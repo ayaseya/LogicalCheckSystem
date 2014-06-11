@@ -1,5 +1,7 @@
 package com.example.logicalchecksystem;
 
+import static com.example.logicalchecksystem.LogicalCheck.*;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -7,6 +9,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.Fragment;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,7 +17,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -87,6 +92,13 @@ public class MainActivity extends Activity {
 
 		private TextView birthdayTV;
 		private Dialog datePickerDialog;
+		private EditText readingET;
+		private TextView readingTV;
+		private StringBuilder lines;
+		private EditText mailET;
+		private TextView mailTV;
+		private EditText passwordET;
+		private TextView passwordTV;
 
 		public PlaceholderFragment() {
 		}
@@ -115,7 +127,7 @@ public class MainActivity extends Activity {
 			DatePickerDialog.OnDateSetListener DateSetListener = new DatePickerDialog.OnDateSetListener() {
 				public void onDateSet(android.widget.DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
 
-					birthdayTV.setText(year + "年" + monthOfYear + 1 + "月" + dayOfMonth + "日");
+					birthdayTV.setText(year + "年" + (monthOfYear + 1) + "月" + dayOfMonth + "日");
 
 				}
 
@@ -134,6 +146,98 @@ public class MainActivity extends Activity {
 					datePickerDialog.show();
 
 				}
+			});
+
+			// メールアドレスを入力するEditTextのインスタンスを取得します。
+			mailET = (EditText) rootView.findViewById(R.id.mailET);
+			mailTV = (TextView) rootView.findViewById(R.id.mailTV);
+
+
+			// メールアドレスを入力するEditTextのインスタンスを取得します。
+			passwordET = (EditText) rootView.findViewById(R.id.passwordET);
+			passwordTV = (TextView) rootView.findViewById(R.id.passwordTV);
+
+
+			// ヨミガナを入力するEditTextのインスタンスを取得します。
+			readingET = (EditText) rootView.findViewById(R.id.readingET);
+			readingTV = (TextView) rootView.findViewById(R.id.readingTV);
+
+			// 登録ボタン用のリスナーを設定します。
+			rootView.findViewById(R.id.registrationBtn).setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+
+					lines = new StringBuilder();
+
+					/**
+					 * メールアドレスをチェックします。
+					 */
+					if (!"".equals(mailET.getText().toString())) {// 入力の有無をチェックします。
+						if (checkMail(mailET.getText().toString())) {
+							lines.append("メールアドレス > Check OK");
+							lines.append(System.getProperty("line.separator"));
+							mailTV.setTextColor(Color.BLACK);
+						} else {
+							lines.append("メールアドレスが不正です");
+							lines.append(System.getProperty("line.separator"));
+							mailTV.setTextColor(Color.RED);
+						}
+					} else {
+						lines.append("メールアドレスが入力されていません");
+						lines.append(System.getProperty("line.separator"));
+						mailTV.setTextColor(Color.RED);
+					}
+
+					/**
+					 * パスワードをチェックします。
+					 */
+					if (!"".equals(passwordET.getText().toString())) {// 入力の有無をチェックします。
+						if (checkPassword(passwordET.getText().toString())) {
+							lines.append("パスワード > Check OK");
+							lines.append(System.getProperty("line.separator"));
+							passwordTV.setTextColor(Color.BLACK);
+						} else {
+							lines.append("パスワードは半角英数字で入力してください");
+							lines.append(System.getProperty("line.separator"));
+							passwordTV.setTextColor(Color.RED);
+						}
+					} else {
+						lines.append("パスワードが入力されていません");
+						lines.append(System.getProperty("line.separator"));
+						passwordTV.setTextColor(Color.RED);
+					}
+
+					/**
+					 * ヨミガナがカタカナかチェックします。
+					 */
+					if (!"".equals(readingET.getText().toString())) {// 入力の有無をチェックします。
+						if (checkReading(readingET.getText().toString())) {
+							lines.append("ヨミガナ > Check OK");
+							lines.append(System.getProperty("line.separator"));
+							readingTV.setTextColor(Color.BLACK);
+						} else {
+							lines.append("ヨミガナは全角カタカナで入力してください");
+							lines.append(System.getProperty("line.separator"));
+							readingTV.setTextColor(Color.RED);
+						}
+					} else {
+						lines.append("ヨミガナが入力されていません");
+						lines.append(System.getProperty("line.separator"));
+						readingTV.setTextColor(Color.RED);
+					}
+
+					 // 最後にマッチしたインデックスを取得
+			        int index = lines.lastIndexOf(System.getProperty("line.separator"));
+
+			        // インデクスを指定して削除して表示
+			        System.out.println(lines.deleteCharAt(index));
+
+					// メッセージを表示します。
+					Toast.makeText(getActivity(), lines.toString(), Toast.LENGTH_SHORT).show();
+
+				}
+
 			});
 
 			return rootView;
