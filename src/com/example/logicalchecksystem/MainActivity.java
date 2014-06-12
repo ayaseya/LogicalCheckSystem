@@ -18,6 +18,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -90,7 +93,7 @@ public class MainActivity extends Activity {
 	 */
 	public static class PlaceholderFragment extends Fragment {
 
-		private TextView birthdayTV;
+		private TextView birthdaySettingTV;
 		private Dialog datePickerDialog;
 		private EditText readingET;
 		private TextView readingTV;
@@ -99,6 +102,13 @@ public class MainActivity extends Activity {
 		private TextView mailTV;
 		private EditText passwordET;
 		private TextView passwordTV;
+		private RadioGroup radioGroup;
+		private View rootView;
+		private String genderRB;
+		private TextView genderTV;
+		private EditText nameET;
+		private TextView nameTV;
+		private TextView birthdayTV;
 
 		public PlaceholderFragment() {
 		}
@@ -106,7 +116,7 @@ public class MainActivity extends Activity {
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
-			View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+			rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
 			//日付情報を初期設定します。
 			// Calendar.MONTHは0(JANUARY)から始まります。
@@ -127,7 +137,7 @@ public class MainActivity extends Activity {
 			DatePickerDialog.OnDateSetListener DateSetListener = new DatePickerDialog.OnDateSetListener() {
 				public void onDateSet(android.widget.DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
 
-					birthdayTV.setText(year + "年" + (monthOfYear + 1) + "月" + dayOfMonth + "日");
+					birthdaySettingTV.setText(year + "年" + (monthOfYear + 1) + "月" + dayOfMonth + "日");
 
 				}
 
@@ -136,8 +146,26 @@ public class MainActivity extends Activity {
 			// 日付設定ダイアログを作成します。
 			datePickerDialog = new DatePickerDialog(getActivity(), DateSetListener, year, monthOfYear, dayOfMonth);
 
-			birthdayTV = (TextView) rootView.findViewById(R.id.birthdaySettingTV);
-			birthdayTV.setOnClickListener(new OnClickListener() {
+			// メールアドレスを入力するEditTextのインスタンスを取得します。
+			mailET = (EditText) rootView.findViewById(R.id.mailET);
+			mailTV = (TextView) rootView.findViewById(R.id.mailTV);
+
+			// メールアドレスを入力するEditTextのインスタンスを取得します。
+			passwordET = (EditText) rootView.findViewById(R.id.passwordET);
+			passwordTV = (TextView) rootView.findViewById(R.id.passwordTV);
+
+			// 名前を入力するEditTextのインスタンスを取得します。
+			nameET = (EditText) rootView.findViewById(R.id.nameET);
+			nameTV = (TextView) rootView.findViewById(R.id.nameTV);
+
+			// ヨミガナを入力するEditTextのインスタンスを取得します。
+			readingET = (EditText) rootView.findViewById(R.id.readingET);
+			readingTV = (TextView) rootView.findViewById(R.id.readingTV);
+
+			// 誕生日を表示するTextViewのインスタンスを取得します。
+			birthdayTV = (TextView) rootView.findViewById(R.id.birthdayTV);
+			birthdaySettingTV = (TextView) rootView.findViewById(R.id.birthdaySettingTV);
+			birthdaySettingTV.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
@@ -148,19 +176,30 @@ public class MainActivity extends Activity {
 				}
 			});
 
-			// メールアドレスを入力するEditTextのインスタンスを取得します。
-			mailET = (EditText) rootView.findViewById(R.id.mailET);
-			mailTV = (TextView) rootView.findViewById(R.id.mailTV);
+			// 性別を選択するRadioGroupのインスタンスを取得します。
+			radioGroup = (RadioGroup) rootView.findViewById(R.id.genderRG);
+			genderTV = (TextView) rootView.findViewById(R.id.genderTV);
 
+			radioGroup.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
-			// メールアドレスを入力するEditTextのインスタンスを取得します。
-			passwordET = (EditText) rootView.findViewById(R.id.passwordET);
-			passwordTV = (TextView) rootView.findViewById(R.id.passwordTV);
+				@Override
+				public void onCheckedChanged(RadioGroup group, int checkedId) {
+					RadioButton radio = (RadioButton) rootView.findViewById(checkedId);
 
+					if (radio.isChecked() == true) {
+						// チェックされた状態の時の処理を記述します。
+						if (checkedId == R.id.maleRB) {
+							genderRB = "男";
+						} else if (checkedId == R.id.femaleRB) {
+							genderRB = "女";
+						}
+					}
+					else {
+						// チェックされていない状態の時の処理を記述します。
+					}
 
-			// ヨミガナを入力するEditTextのインスタンスを取得します。
-			readingET = (EditText) rootView.findViewById(R.id.readingET);
-			readingTV = (TextView) rootView.findViewById(R.id.readingTV);
+				}
+			});
 
 			// 登録ボタン用のリスナーを設定します。
 			rootView.findViewById(R.id.registrationBtn).setOnClickListener(new OnClickListener() {
@@ -175,8 +214,8 @@ public class MainActivity extends Activity {
 					 */
 					if (!"".equals(mailET.getText().toString())) {// 入力の有無をチェックします。
 						if (checkMail(mailET.getText().toString())) {
-							lines.append("メールアドレス > Check OK");
-							lines.append(System.getProperty("line.separator"));
+							//							lines.append("メールアドレス > Check OK");
+							//							lines.append(System.getProperty("line.separator"));
 							mailTV.setTextColor(Color.BLACK);
 						} else {
 							lines.append("メールアドレスが不正です");
@@ -194,9 +233,18 @@ public class MainActivity extends Activity {
 					 */
 					if (!"".equals(passwordET.getText().toString())) {// 入力の有無をチェックします。
 						if (checkPassword(passwordET.getText().toString())) {
-							lines.append("パスワード > Check OK");
-							lines.append(System.getProperty("line.separator"));
-							passwordTV.setTextColor(Color.BLACK);
+							//							lines.append("パスワード > Check OK");
+							//							lines.append(System.getProperty("line.separator"));
+
+							if (passwordET.getText().toString().length() > 7) {
+								passwordTV.setTextColor(Color.BLACK);
+
+							}else{
+								lines.append("パスワードは8文字で構成してください");
+								lines.append(System.getProperty("line.separator"));
+								passwordTV.setTextColor(Color.RED);
+							}
+
 						} else {
 							lines.append("パスワードは半角英数字で入力してください");
 							lines.append(System.getProperty("line.separator"));
@@ -209,32 +257,77 @@ public class MainActivity extends Activity {
 					}
 
 					/**
-					 * ヨミガナがカタカナかチェックします。
+					 * 名前が入力された状態かチェックします。
+					 */
+					if (!"".equals(nameET.getText().toString())) {// 入力の有無をチェックします。
+						//						lines.append("名前 > Check OK");
+						//						lines.append(System.getProperty("line.separator"));
+						nameTV.setTextColor(Color.BLACK);
+
+					} else {
+						lines.append("名前が入力されていません");
+						lines.append(System.getProperty("line.separator"));
+						nameTV.setTextColor(Color.RED);
+					}
+
+					/**
+					 * フリガナがカタカナかチェックします。
 					 */
 					if (!"".equals(readingET.getText().toString())) {// 入力の有無をチェックします。
 						if (checkReading(readingET.getText().toString())) {
-							lines.append("ヨミガナ > Check OK");
-							lines.append(System.getProperty("line.separator"));
+							//							lines.append("ヨミガナ > Check OK");
+							//							lines.append(System.getProperty("line.separator"));
 							readingTV.setTextColor(Color.BLACK);
 						} else {
-							lines.append("ヨミガナは全角カタカナで入力してください");
+							lines.append("フリガナは全角カタカナで入力してください");
 							lines.append(System.getProperty("line.separator"));
 							readingTV.setTextColor(Color.RED);
 						}
 					} else {
-						lines.append("ヨミガナが入力されていません");
+						lines.append("フリガナが入力されていません");
 						lines.append(System.getProperty("line.separator"));
 						readingTV.setTextColor(Color.RED);
 					}
 
-					 // 最後にマッチしたインデックスを取得
-			        int index = lines.lastIndexOf(System.getProperty("line.separator"));
+					/**
+					 * 誕生日が入力済みかチェックします。
+					 */
+					if (!"----年--月--日".equals(birthdaySettingTV.getText().toString())) {// 入力の有無をチェックします。
+						//						lines.append("誕生日 > Check OK");
+						//						lines.append(System.getProperty("line.separator"));
+						birthdayTV.setTextColor(Color.BLACK);
 
-			        // インデクスを指定して削除して表示
-			        System.out.println(lines.deleteCharAt(index));
+					} else {
+						lines.append("誕生日が入力されていません");
+						lines.append(System.getProperty("line.separator"));
+						birthdayTV.setTextColor(Color.RED);
+					}
+
+					/**
+					 * 性別が選択されているかチェックします。
+					 */
+					if (genderRB != null) {// 入力の有無をチェックします。
+						//						lines.append("性別 > Check OK");
+						//						lines.append(System.getProperty("line.separator"));
+						genderTV.setTextColor(Color.BLACK);
+
+					} else {
+						lines.append("性別が選択されていません");
+						lines.append(System.getProperty("line.separator"));
+						genderTV.setTextColor(Color.RED);
+					}
+
+					// 最後にマッチしたインデックスを取得します。
+					int index = lines.lastIndexOf(System.getProperty("line.separator"));
+					// インデックスを指定して削除します。
+					if (index != -1) {
+						lines.deleteCharAt(index);
+					} else {
+						lines.append("登録完了");
+					}
 
 					// メッセージを表示します。
-					Toast.makeText(getActivity(), lines.toString(), Toast.LENGTH_SHORT).show();
+					Toast.makeText(getActivity(), lines.toString(), Toast.LENGTH_LONG).show();
 
 				}
 

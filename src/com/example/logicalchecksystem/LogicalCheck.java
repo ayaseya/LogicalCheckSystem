@@ -18,11 +18,6 @@ public final class LogicalCheck {
 	public static final String MATCH_MAIL =
 			"([a-zA-Z0-9][a-zA-Z0-9_.+\\-]*)@(([a-zA-Z0-9][a-zA-Z0-9_\\-]+\\.)+[a-zA-Z]{2,6})";
 
-	// コンストラクタです。
-	public LogicalCheck() {
-
-	}
-
 	/**
 	 * メールアドレスに入力された文字列が@マークを含めた文字列で構成されているかチェックします。
 	 * @param mail チェック対象文字列

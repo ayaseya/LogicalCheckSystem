@@ -37,7 +37,7 @@
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:text="※ログインIDとして使用します"
-        android:textColor="#ff0000" />
+        android:textColor="#008080" />
 
     <View
         android:layout_width="match_parent"
@@ -74,7 +74,7 @@
         android:layout_height="wrap_content"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        android:text="※使用可能な文字列は半角英数字のみです\n  大文字(A)小文字(a)は区別しません"
+        android:text="※使用可能な文字列は半角英数字のみです"
         android:textColor="#008080" />
 
     <View
@@ -161,7 +161,7 @@
             android:gravity="center"
             android:paddingBottom="5dp"
             android:paddingTop="5dp"
-            android:text="2000年01月01日"
+            android:text="----年--月--日"
             android:textSize="18sp" />
     </LinearLayout>
 
@@ -185,7 +185,7 @@
             android:text="性別:" />
 
         <RadioGroup
-            android:id="@+id/gender"
+            android:id="@+id/genderRG"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3"
@@ -196,7 +196,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:checked="true"
+
                 android:text="男" />
 
             <RadioButton
