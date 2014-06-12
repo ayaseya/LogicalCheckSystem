@@ -231,8 +231,22 @@ public class MainActivity extends Activity {
 							//							lines.append("メールアドレス > Check OK");
 							//							lines.append(System.getProperty("line.separator"));
 
-							mail = mailET.getText().toString();
-							mailTV.setTextColor(Color.BLACK);
+							// SQLiteHelperのコンストラクターを呼び出します。
+							CustomerSQLiteOpenHelper dbHelper = new CustomerSQLiteOpenHelper(getActivity());
+							SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+							// Daoクラスのコンストラクターを呼び出します。
+							Dao dao = new Dao(db);
+							if (dao.check(mailET.getText().toString())) {
+								mail = mailET.getText().toString();
+								mailTV.setTextColor(Color.BLACK);
+							}else{
+								lines.append("すでに同じメールアドレスが登録されています");
+								lines.append(System.getProperty("line.separator"));
+								mailTV.setTextColor(Color.RED);
+							}
+							db.close();
+
 						} else {
 							lines.append("メールアドレスが不正です");
 							lines.append(System.getProperty("line.separator"));

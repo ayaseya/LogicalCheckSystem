@@ -62,6 +62,23 @@ public class Dao {
 		return list;
 	}
 
+	public boolean check(String _id) {
+
+		String sql = "SELECT * FROM customer_tbl WHERE _id ='" + _id + "';";
+		Log.v("TEST", "SQL文=" + sql);
+
+		// 第一引数SQL文、第二引数はSQL文内に埋め込まれた「?」にはめ込むString配列です。
+		Cursor cursor = db.rawQuery(sql, null);
+
+		if (cursor.moveToNext()) {
+			cursor.close();
+			return true;
+		}
+		cursor.close();
+		return false;
+
+	}
+
 	// COUNT処理
 	public long count() {
 
