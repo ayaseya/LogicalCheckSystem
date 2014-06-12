@@ -6,7 +6,7 @@
     tools:context="com.example.logicalchecksystem.MainActivity$PlaceholderFragment" >
 
     <ListView
-        android:id="@+id/TableListView"
+        android:id="@+id/tableListView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
     </ListView>

@@ -3,12 +3,17 @@ package com.example.logicalchecksystem;
 import static com.example.logicalchecksystem.LogicalCheck.*;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.Fragment;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,9 +23,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -104,11 +111,18 @@ public class MainActivity extends Activity {
 		private TextView passwordTV;
 		private RadioGroup radioGroup;
 		private View rootView;
-		private String genderRB;
 		private TextView genderTV;
 		private EditText nameET;
 		private TextView nameTV;
 		private TextView birthdayTV;
+
+		private String _id;// 顧客に割り振るユニークなID(連番)
+		private String mail;// メールアドレス(ログインに用いるため重複不可)
+		private String password;// 8文字の半角英数字(ハイフンやアンダーバーなどの記号は不可)
+		private String name;// 名前(日本人以外も登録する可能性があるため制限なし)
+		private String reading;// 全角カナ、読み方
+		private String birthday;// 誕生日(2000-01-01形式)、現在よりも後の日付や閏年以外の2月29日など存在しない日は入力できない
+		private String gender;// 性別(男女)
 
 		public PlaceholderFragment() {
 		}
@@ -189,9 +203,9 @@ public class MainActivity extends Activity {
 					if (radio.isChecked() == true) {
 						// チェックされた状態の時の処理を記述します。
 						if (checkedId == R.id.maleRB) {
-							genderRB = "男";
+							gender = "男";
 						} else if (checkedId == R.id.femaleRB) {
-							genderRB = "女";
+							gender = "女";
 						}
 					}
 					else {
@@ -216,6 +230,8 @@ public class MainActivity extends Activity {
 						if (checkMail(mailET.getText().toString())) {
 							//							lines.append("メールアドレス > Check OK");
 							//							lines.append(System.getProperty("line.separator"));
+
+							mail = mailET.getText().toString();
 							mailTV.setTextColor(Color.BLACK);
 						} else {
 							lines.append("メールアドレスが不正です");
@@ -237,9 +253,11 @@ public class MainActivity extends Activity {
 							//							lines.append(System.getProperty("line.separator"));
 
 							if (passwordET.getText().toString().length() > 7) {
+
+								password = passwordET.getText().toString();
 								passwordTV.setTextColor(Color.BLACK);
 
-							}else{
+							} else {
 								lines.append("パスワードは8文字で構成してください");
 								lines.append(System.getProperty("line.separator"));
 								passwordTV.setTextColor(Color.RED);
@@ -262,6 +280,8 @@ public class MainActivity extends Activity {
 					if (!"".equals(nameET.getText().toString())) {// 入力の有無をチェックします。
 						//						lines.append("名前 > Check OK");
 						//						lines.append(System.getProperty("line.separator"));
+
+						name = nameET.getText().toString();
 						nameTV.setTextColor(Color.BLACK);
 
 					} else {
@@ -277,6 +297,8 @@ public class MainActivity extends Activity {
 						if (checkReading(readingET.getText().toString())) {
 							//							lines.append("ヨミガナ > Check OK");
 							//							lines.append(System.getProperty("line.separator"));
+
+							reading = readingET.getText().toString();
 							readingTV.setTextColor(Color.BLACK);
 						} else {
 							lines.append("フリガナは全角カタカナで入力してください");
@@ -295,6 +317,8 @@ public class MainActivity extends Activity {
 					if (!"----年--月--日".equals(birthdaySettingTV.getText().toString())) {// 入力の有無をチェックします。
 						//						lines.append("誕生日 > Check OK");
 						//						lines.append(System.getProperty("line.separator"));
+
+						birthday = birthdaySettingTV.getText().toString();
 						birthdayTV.setTextColor(Color.BLACK);
 
 					} else {
@@ -306,7 +330,7 @@ public class MainActivity extends Activity {
 					/**
 					 * 性別が選択されているかチェックします。
 					 */
-					if (genderRB != null) {// 入力の有無をチェックします。
+					if (gender != null) {// 入力の有無をチェックします。
 						//						lines.append("性別 > Check OK");
 						//						lines.append(System.getProperty("line.separator"));
 						genderTV.setTextColor(Color.BLACK);
@@ -323,11 +347,37 @@ public class MainActivity extends Activity {
 					if (index != -1) {
 						lines.deleteCharAt(index);
 					} else {
-						lines.append("登録完了");
+
+						// SQLiteHelperのコンストラクターを呼び出します。
+						CustomerSQLiteOpenHelper dbHelper = new CustomerSQLiteOpenHelper(getActivity());
+						SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+						// Daoクラスのコンストラクターを呼び出します。
+						Dao dao = new Dao(db);
+
+						// テーブルの行数から_idの数字を決定します。
+						_id = String.valueOf(dao.count() + 1);
+						// 00000の形式で表示するため行数が何桁の整数か確認します。
+						int figure = String.valueOf(dao.count() + 1).length();
+						// 足りない桁数を文字列結合で補います。
+						for (int i = 0; i < 5 - figure; i++) {
+							_id = "0" + _id;
+						}
+
+						// INSERTを実行します。
+						dao.insert(new Customer(_id, mail, password, name, reading, birthday, gender));
+
+						db.close();
+						getFragmentManager().beginTransaction()
+								.replace(R.id.container, new TableFragment())
+								.commit();
+
 					}
 
-					// メッセージを表示します。
-					Toast.makeText(getActivity(), lines.toString(), Toast.LENGTH_LONG).show();
+					if (!"".equals(lines.toString())) {// 表示するメッセージが存在するかのチェックします。
+						// メッセージを表示します。
+						Toast.makeText(getActivity(), lines.toString(), Toast.LENGTH_LONG).show();
+					}
 
 				}
 
@@ -342,6 +392,9 @@ public class MainActivity extends Activity {
 	 */
 	public static class TableFragment extends Fragment {
 
+		private ArrayList<Map<String, String>> listData;
+		private SimpleAdapter adapter;
+
 		public TableFragment() {
 		}
 
@@ -349,6 +402,49 @@ public class MainActivity extends Activity {
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 			View rootView = inflater.inflate(R.layout.fragment_table, container, false);
+
+			// リストビューのインスタンスを取得します。
+			ListView listView = (ListView) rootView.findViewById(R.id.tableListView);
+
+			// SQLiteHelperのコンストラクターを呼び出します。
+			CustomerSQLiteOpenHelper dbHelper = new CustomerSQLiteOpenHelper(getActivity());
+			SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+			// Daoクラスのコンストラクターを呼び出します。
+			Dao dao = new Dao(db);
+
+			// リストに家族の情報を格納します。
+			List<Customer> list = dao.findAll();
+
+			db.close();
+
+			// SimpleAdapterに渡すデータを作成します。
+			listData = new ArrayList<Map<String, String>>();
+
+			// 社員データを連想配列にして、employeeDataに格納します。
+			for (Customer tmp : list) {
+				Map<String, String> data = new HashMap<String, String>();
+				data.put("_id", tmp.get_id());
+				data.put("mail", tmp.getMail());
+				data.put("password", tmp.getPassword());
+				data.put("name", tmp.getName());
+				data.put("reading", tmp.getReading());
+				data.put("birthday", tmp.getBirthday());
+				data.put("gender", tmp.getGender());
+				listData.add(data);
+			}
+
+			// アダプターを作成します。
+			adapter = new SimpleAdapter(getActivity(),
+					listData,
+					R.layout.simple_list_item_customer,
+					new String[] { "_id", "mail", "password", "name", "reading", "birthday", "gender" },
+					new int[] { R.id.customerIdTV, R.id.customerMailTV, R.id.customerPasswordTV, R.id.customerNameTV, R.id.customerReadingTV,
+							R.id.customerBirthdayTV, R.id.customerGenderTV });
+
+			// リストビューにアダプターを設定します。
+			listView.setAdapter(adapter);
+
 			return rootView;
 		}
 	}

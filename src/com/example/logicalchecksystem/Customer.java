@@ -11,8 +11,19 @@ public class Customer {
 	private String reading;// 全角カナ、読み方
 	private String birthday;// 誕生日(2000-01-01形式)、現在よりも後の日付や閏年以外の2月29日など存在しない日は入力できない
 	private String gender;// 性別(男女)
-	private String telephone;// 電話番号(未入力可)
-	private String address;// 住所(未入力可)
+
+	public Customer() {
+	}
+
+	public Customer(String _id, String mail, String password, String name, String reading, String birthday, String gender) {
+		this._id = _id;
+		this.mail = mail;
+		this.password = password;
+		this.name = name;
+		this.reading = reading;
+		this.birthday = birthday;
+		this.gender = gender;
+	}
 
 	public String get_id() {
 		return _id;
@@ -76,22 +87,6 @@ public class Customer {
 
 	public void setGender(String gender) {
 		this.gender = gender;
-	}
-
-	public String getTelephone() {
-		return telephone;
-	}
-
-	public void setTelephone(String telephone) {
-		this.telephone = telephone;
-	}
-
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
 	}
 
 }
