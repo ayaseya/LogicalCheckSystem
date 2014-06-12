@@ -72,10 +72,10 @@ public class Dao {
 
 		if (cursor.moveToNext()) {
 			cursor.close();
-			return true;
+			return false;
 		}
 		cursor.close();
-		return false;
+		return true;
 
 	}
 

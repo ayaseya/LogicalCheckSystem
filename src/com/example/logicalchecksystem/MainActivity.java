@@ -151,7 +151,7 @@ public class MainActivity extends Activity {
 			DatePickerDialog.OnDateSetListener DateSetListener = new DatePickerDialog.OnDateSetListener() {
 				public void onDateSet(android.widget.DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
 
-					birthdaySettingTV.setText(year + "年" + (monthOfYear + 1) + "月" + dayOfMonth + "日");
+					birthdaySettingTV.setText(year + "-" + (monthOfYear + 1) + "-" + dayOfMonth);
 
 				}
 
