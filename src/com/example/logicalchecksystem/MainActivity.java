@@ -2,7 +2,6 @@ package com.example.logicalchecksystem;
 
 import static com.example.logicalchecksystem.LogicalCheck.*;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -16,6 +15,7 @@ import android.app.Fragment;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -121,8 +121,13 @@ public class MainActivity extends Activity {
 		private String password;// 8文字の半角英数字(ハイフンやアンダーバーなどの記号は不可)
 		private String name;// 名前(日本人以外も登録する可能性があるため制限なし)
 		private String reading;// 全角カナ、読み方
-		private String birthday;// 誕生日(2000-01-01形式)、現在よりも後の日付や閏年以外の2月29日など存在しない日は入力できない
+		private String birthday;// 生年月日(2000-01-01形式)、現在よりも後の日付や閏年以外の2月29日など存在しない日は入力できない
 		private String gender;// 性別(男女)
+		private Calendar calendar;
+		private int year;
+		private int month;
+		private int day;
+		private String currentTime;
 
 		public PlaceholderFragment() {
 		}
@@ -136,29 +141,37 @@ public class MainActivity extends Activity {
 			// Calendar.MONTHは0(JANUARY)から始まります。
 			// http://www.javadrive.jp/start/calendar/index2.html
 
-			Calendar calendar = Calendar.getInstance();
-			int year = calendar.get(Calendar.YEAR);
-			int monthOfYear = calendar.get(Calendar.MONTH);
-			int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+			calendar = Calendar.getInstance();
+			year = calendar.get(Calendar.YEAR);
+			month = calendar.get(Calendar.MONTH);
+			day = calendar.get(Calendar.DAY_OF_MONTH);
+
+			currentTime = year + "-" + (month + 1) + "-" + day;
 
 			// SimpleDateFormatクラスによる書式設定
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-
-			sdf.applyPattern("yyyy'年'MM'月'dd'日'HH':'mm':'ss");
-			final String tmp = sdf.format(Calendar.getInstance().getTime());
+			//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			//
+			//			sdf.applyPattern("yyyy'-'MM'-'dd");
+			//			final String tmp = sdf.format(Calendar.getInstance().getTime());
+			//
+			//			Log.v("TEST", "現在時刻:"+tmp);
 
 			//日付設定時のリスナーを作成します。
 			DatePickerDialog.OnDateSetListener DateSetListener = new DatePickerDialog.OnDateSetListener() {
-				public void onDateSet(android.widget.DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
+				public void onDateSet(android.widget.DatePicker datePicker, int yyyy, int mm, int dd) {
 
-					birthdaySettingTV.setText(year + "-" + (monthOfYear + 1) + "-" + dayOfMonth);
+					year = yyyy;
+					month = mm;
+					day = dd;
+
+					birthdaySettingTV.setText(yyyy + "-" + (mm + 1) + "-" + dd);
 
 				}
 
 			};
 
 			// 日付設定ダイアログを作成します。
-			datePickerDialog = new DatePickerDialog(getActivity(), DateSetListener, year, monthOfYear, dayOfMonth);
+			datePickerDialog = new DatePickerDialog(getActivity(), DateSetListener, year, month, day);
 
 			// メールアドレスを入力するEditTextのインスタンスを取得します。
 			mailET = (EditText) rootView.findViewById(R.id.mailET);
@@ -176,7 +189,7 @@ public class MainActivity extends Activity {
 			readingET = (EditText) rootView.findViewById(R.id.readingET);
 			readingTV = (TextView) rootView.findViewById(R.id.readingTV);
 
-			// 誕生日を表示するTextViewのインスタンスを取得します。
+			// 生年月日を表示するTextViewのインスタンスを取得します。
 			birthdayTV = (TextView) rootView.findViewById(R.id.birthdayTV);
 			birthdaySettingTV = (TextView) rootView.findViewById(R.id.birthdaySettingTV);
 			birthdaySettingTV.setOnClickListener(new OnClickListener() {
@@ -240,7 +253,7 @@ public class MainActivity extends Activity {
 							if (dao.check(mailET.getText().toString())) {
 								mail = mailET.getText().toString();
 								mailTV.setTextColor(Color.BLACK);
-							}else{
+							} else {
 								lines.append("すでに同じメールアドレスが登録されています");
 								lines.append(System.getProperty("line.separator"));
 								mailTV.setTextColor(Color.RED);
@@ -326,17 +339,30 @@ public class MainActivity extends Activity {
 					}
 
 					/**
-					 * 誕生日が入力済みかチェックします。
+					 * 生年月日が入力済みかチェックします。
 					 */
 					if (!"----年--月--日".equals(birthdaySettingTV.getText().toString())) {// 入力の有無をチェックします。
-						//						lines.append("誕生日 > Check OK");
+						//						lines.append("生年月日 > Check OK");
 						//						lines.append(System.getProperty("line.separator"));
 
-						birthday = birthdaySettingTV.getText().toString();
-						birthdayTV.setTextColor(Color.BLACK);
+						int diff = currentTime.compareTo(birthdaySettingTV.getText().toString());
+
+						Log.v("TEST", "diff=" + diff);
+						Log.v("TEST", "currentTime=" + currentTime);
+						Log.v("TEST", "birthdayTime=" + birthdaySettingTV.getText().toString());
+
+						if (diff >= 0) {
+
+							birthday = birthdaySettingTV.getText().toString();
+							birthdayTV.setTextColor(Color.BLACK);
+						} else {
+							lines.append("生年月日が現在日時より進んでいます");
+							lines.append(System.getProperty("line.separator"));
+							birthdayTV.setTextColor(Color.RED);
+						}
 
 					} else {
-						lines.append("誕生日が入力されていません");
+						lines.append("生年月日が入力されていません");
 						lines.append(System.getProperty("line.separator"));
 						birthdayTV.setTextColor(Color.RED);
 					}
